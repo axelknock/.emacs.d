@@ -1,0 +1,6 @@
+(defun pp-sexp-at-point (&optional ARG)
+  "Use cl-prettyprint to pretty print list at point."
+  (interactive)
+  (let ((sexp (sexp-at-point))) (insert (with-output-to-string (cl-prettyprint sexp)))))
+  
+'(("d" python-describe-at-point "") ("f" python-eldoc-at-point "Get help on SYMBOL using ‘help’.") ("v" python-check "Check a Python file (default current buffer’s file).") ("z" python-shell-switch-to-shell "Switch to inferior Python process buffer.") ("l" python-shell-send-file "Send FILE-NAME to inferior Python PROCESS.") ("c" python-shell-send-buffer "Send the entire buffer to inferior Python process.") ("r" python-shell-send-region "Send the region delimited by START and END to inferior Python process.") ("e" python-shell-send-statement "Send the statement at point to inferior Python process.") ("s" python-shell-send-string "Send STRING to inferior Python PROCESS.") ("p" run-python "Run an inferior Python process.") (nil python-indent-shift-left "Shift lines contained in region START END by COUNT columns to the left.") ("j" imenu "Jump to a place in the buffer chosen using a buffer menu or mouse menu.") ("i" python-add-import "Add an import statement to the current buffer.") ("t" python-skeleton-class "Insert class statement."))

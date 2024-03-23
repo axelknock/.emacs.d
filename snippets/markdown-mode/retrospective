@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: Retrospective
+# key: retro
+# --
+## Goals
+| # | Goal | Grade |
+|:--|:-----|:------|
+| [1](#${1:$(my/handleize-string yas-text)}) | $1 |   |
+| [2](#${2:$(my/handleize-string yas-text)}) | $2 |   |
+| [3](#${3:$(my/handleize-string yas-text)}) | $3 |   |
+{{/*
+## Notes
+### $1
+### $2
+### $3
+*/}}
+

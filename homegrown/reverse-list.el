@@ -1,0 +1,5 @@
+(defun my/reverse-sentence ()
+  (interactive)
+  (let ((region (buffer-substring-no-properties (region-beginning) (region-end))))
+    (delete-region (region-beginning) (region-end))
+    (insert (s-join " "(reverse (split-string region))))))

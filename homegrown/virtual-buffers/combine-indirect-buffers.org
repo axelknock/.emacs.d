@@ -1,0 +1,193 @@
+#+begin_src C
+DEFUN ("make-indirect-buffer", Fmake_indirect_buffer, Smake_indirect_buffer,
+       2, 4,
+       "bMake indirect buffer (to buffer): \nBName of indirect buffer: ",
+       doc: /* Create and return an indirect buffer for buffer BASE-BUFFER, named NAME.
+BASE-BUFFER should be a live buffer, or the name of an existing buffer.
+
+NAME should be a string which is not the name of an existing buffer.
+Optional argument CLONE non-nil means preserve BASE-BUFFER's state,
+such as major and minor modes, in the indirect buffer.
+
+CLONE nil means the indirect buffer's state is reset to default values.
+
+If optional argument INHIBIT-BUFFER-HOOKS is non-nil, the new buffer
+does not run the hooks `kill-buffer-hook',
+`kill-buffer-query-functions', and `buffer-list-update-hook'.  */)
+  (Lisp_Object base_buffer, Lisp_Object name, Lisp_Object clone,
+   Lisp_Object inhibit_buffer_hooks)
+{
+  Lisp_Object buf, tem;
+  struct buffer *b;
+
+  CHECK_STRING (name);
+  buf = Fget_buffer (name);
+  if (!NILP (buf))
+    error ("Buffer name `%s' is in use", SDATA (name));
+
+  tem = base_buffer;
+  base_buffer = Fget_buffer (base_buffer);
+  if (NILP (base_buffer))
+    error ("No such buffer: `%s'", SDATA (tem));
+  if (!BUFFER_LIVE_P (XBUFFER (base_buffer)))
+    error ("Base buffer has been killed");
+
+  if (SCHARS (name) == 0)
+    error ("Empty string for buffer name is not allowed");
+
+  b = allocate_buffer ();
+
+  /* No double indirection - if base buffer is indirect,
+     new buffer becomes an indirect to base's base.  */
+  b->base_buffer = (XBUFFER (base_buffer)->base_buffer
+		    ? XBUFFER (base_buffer)->base_buffer
+		    : XBUFFER (base_buffer));
+
+  /* Use the base buffer's text object.  */
+  b->text = b->base_buffer->text;
+  /* We have no own text.  */
+  b->indirections = -1;
+  /* Notify base buffer that we share the text now.  */
+  b->base_buffer->indirections++;
+  /* Always -1 for an indirect buffer.  */
+  b->window_count = -1;
+
+  memset (&b->local_flags, 0, sizeof (b->local_flags));
+
+  b->pt = b->base_buffer->pt;
+  b->begv = b->base_buffer->begv;
+  b->zv = b->base_buffer->zv;
+  b->pt_byte = b->base_buffer->pt_byte;
+  b->begv_byte = b->base_buffer->begv_byte;
+  b->zv_byte = b->base_buffer->zv_byte;
+  b->inhibit_buffer_hooks = !NILP (inhibit_buffer_hooks);
+
+  b->newline_cache = 0;
+  b->width_run_cache = 0;
+  b->bidi_paragraph_cache = 0;
+  bset_width_table (b, Qnil);
+
+  name = Fcopy_sequence (name);
+  set_string_intervals (name, NULL);
+  bset_name (b, name);
+
+  /* An indirect buffer shares undo list of its base (Bug#18180).  */
+  bset_undo_list (b, BVAR (b->base_buffer, undo_list));
+
+  reset_buffer (b);
+  reset_buffer_local_variables (b, 1);
+
+  /* Put this in the alist of all live buffers.  */
+  XSETBUFFER (buf, b);
+  Vbuffer_alist = nconc2 (Vbuffer_alist, list1 (Fcons (name, buf)));
+
+  bset_mark (b, Fmake_marker ());
+
+  /* The multibyte status belongs to the base buffer.  */
+  bset_enable_multibyte_characters
+    (b, BVAR (b->base_buffer, enable_multibyte_characters));
+
+  /* Make sure the base buffer has markers for its narrowing.  */
+  if (NILP (BVAR (b->base_buffer, pt_marker)))
+    {
+      eassert (NILP (BVAR (b->base_buffer, begv_marker)));
+      eassert (NILP (BVAR (b->base_buffer, zv_marker)));
+
+      bset_pt_marker (b->base_buffer,
+		      build_marker (b->base_buffer, b->base_buffer->pt,
+				    b->base_buffer->pt_byte));
+
+      bset_begv_marker (b->base_buffer,
+			build_marker (b->base_buffer, b->base_buffer->begv,
+				      b->base_buffer->begv_byte));
+
+      bset_zv_marker (b->base_buffer,
+		      build_marker (b->base_buffer, b->base_buffer->zv,
+				    b->base_buffer->zv_byte));
+
+      XMARKER (BVAR (b->base_buffer, zv_marker))->insertion_type = 1;
+    }
+
+  if (NILP (clone))
+    {
+      /* Give the indirect buffer markers for its narrowing.  */
+      bset_pt_marker (b, build_marker (b, b->pt, b->pt_byte));
+      bset_begv_marker (b, build_marker (b, b->begv, b->begv_byte));
+      bset_zv_marker (b, build_marker (b, b->zv, b->zv_byte));
+      XMARKER (BVAR (b, zv_marker))->insertion_type = 1;
+    }
+  else
+    {
+      struct buffer *old_b = current_buffer;
+
+      clone_per_buffer_values (b->base_buffer, b);
+      bset_filename (b, Qnil);
+      bset_file_truename (b, Qnil);
+      bset_display_count (b, make_fixnum (0));
+      bset_backed_up (b, Qnil);
+      bset_local_minor_modes (b, Qnil);
+      bset_auto_save_file_name (b, Qnil);
+      set_buffer_internal_1 (b);
+      Fset (intern ("buffer-save-without-query"), Qnil);
+      Fset (intern ("buffer-file-number"), Qnil);
+      if (!NILP (Flocal_variable_p (Qbuffer_stale_function, base_buffer)))
+	Fkill_local_variable (Qbuffer_stale_function);
+      /* Cloned buffers need extra setup, to do things such as deep
+	 variable copies for list variables that might be mangled due
+	 to destructive operations in the indirect buffer. */
+      run_hook (Qclone_indirect_buffer_hook);
+      set_buffer_internal_1 (old_b);
+    }
+
+  run_buffer_list_update_hook (b);
+
+  return buf;
+}
+#+end_src
+<user>
+Given this function, how can I make an elisp function that combines multiple indirect buffers into one buffer?
+</user>
+
+To create an Elisp function that combines multiple indirect buffers into one buffer, you can follow these steps:
+
+1. Define a new function that takes a list of buffer names as input.
+2. Create a new buffer to hold the combined contents.
+3. Iterate over the list of buffer names.
+4. For each buffer name, find the corresponding buffer using `get-buffer`.
+5. If the buffer is an indirect buffer (check using `buffer-base-buffer`), insert its contents into the new buffer.
+6. Return the newly created buffer.
+
+Here's an example implementation:
+#+begin_src emacs-lisp :tangle yes
+(defun combine-indirect-buffers (buffer-list)
+  "Combine the contents of multiple indirect buffers into a new buffer."
+  (let ((new-buffer (generate-new-buffer "*Combined Indirect Buffers*")))
+    (with-current-buffer new-buffer
+      (dolist (buffer-name buffer-list)
+        (let ((buffer (get-buffer buffer-name)))
+          (when (and buffer (buffer-base-buffer buffer))
+            (insert-buffer-substring buffer)
+            (goto-char (point-max))
+            (insert "\n")))))
+    new-buffer))
+#+end_src
+
+
+#+begin_src emacs-lisp :tangle yes
+(defun combine-indirect-buffers (buffer-list)
+  "Combine the contents of multiple indirect buffers into a new indirect buffer."
+  (let* ((base-buffer (generate-new-buffer "*Combined Indirect Buffers*"))
+         (indirect-buffer (make-indirect-buffer base-buffer "*Combined Indirect Buffers*" t)))
+    (with-current-buffer base-buffer
+      (dolist (buffer-name buffer-list)
+        (let ((buffer (get-buffer buffer-name)))
+          (when (and buffer (buffer-base-buffer buffer))
+            (insert-buffer-substring buffer)
+            (goto-char (point-max))
+            (insert "\n")))))
+    indirect-buffer))
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(combine-indirect-buffers '(modified rest))
+#+end_src
