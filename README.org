@@ -1633,11 +1633,11 @@ Multiple cursors for emacs.
   (:map god-local-mode-map
         ("TAB" . indent-for-tab-command))
   :init
+  (require 'god-mode)
   (defun my-god-mode-update-cursor-type ()
     (setq cursor-type (if (or god-local-mode buffer-read-only) 'hbar 'bar)))
   (add-hook 'post-command-hook #'my-god-mode-update-cursor-type)
-  (add-to-list 'god-exempt-major-modes 'vterm-mode)
-  (require 'god-mode))
+  (add-to-list 'god-exempt-major-modes 'vterm-mode))
 #+end_src
 *** My custom keybindings
 #+begin_src emacs-lisp
