@@ -18,7 +18,7 @@
 (straight-use-package 'project)
 (straight-use-package 'package)
 (straight-use-package 'org)
-;; Elpaca bootstrap
+;; Begin elpaca bootstrap
 (defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -57,42 +57,13 @@
     (load "./elpaca-autoloads")))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
+;; End elpaca bootstrap
+(global-auto-revert-mode)
 (load-file "./.person.el")
+(let ((custom (expand-file-name ".custom.el" my-emacs-path)))
+  (when (file-exists-p custom)
+    (setq custom-file custom)
+    (load-file custom)))
 (set-face-attribute 'default nil :family my-selected-font :height 120)
 (set-face-attribute 'variable-pitch nil :family my-selected-font :height 120)
 (org-babel-load-file (expand-file-name "README.org" my-emacs-path))
-(global-auto-revert-mode)
-(put 'scroll-left 'disabled nil)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(js-indent-level 2)
- '(markdown-asymmetric-header t)
- '(markdown-command "pandoc --wrap=preserve")
- '(safe-local-variable-values
-   '((denote-toml-front-matter . "+++\12title      = %s\12date       = %s\12tags       = %s\12identifier = %S\12test       = %$(string \"hello\")\12+++\12\12")
-     (denote-prompts subdirectory title keywords)
-     (denote-directory . "/home/lucian/Nextcloud/H/hugo/lucianknock.com/content/")
-     (denote-templates
-      ("retro" org-file-contents "./retro-template.md"))
-     (denote-prompts title subdirectory template)
-     (denote-file-type . markdown-toml)
-     (denote-file-type quote markdown-toml)
-     (denote-filetype quote markdown-toml)
-     (denote-directory . "/home/lucian/Nextcloud/W/websites/lucianknock.com/content/")
-     (eval progn
-           (org-babel-next-src-block)
-           (org-babel-execute-src-block))))
- '(timu-macos-flavour "light")
- '(warning-suppress-types '((use-package)))
- '(web-mode-markup-comment-indent-offset 2))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
