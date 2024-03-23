@@ -9,10 +9,19 @@ The alternative to this of course is to simply use git and push and pull changes
 [[https://github.com/bbatsov/emacs-lisp-style-guide][Emacs Lisp Style Guide]]
 [[info:elisp#Coding Conventions][Emacs Lisp Coding Conventions]]
 *** Customization & Usage
-If you would like to use this configuration, then edit the contents of the file =.personal-example.el= and rename it to =.personal.el=. Then symbolically link it to your home directory. Either use the following command in a terminal, or use =dired=, where the key to create symbolic links is "S".
+If you would like to use this configuration, then there are a couple of steps.
+
+1. First, clone this repository somewhere emacs will expect it to be. This could be your home folder, since on launch emacs looks for the contents of the =~/.emacs.d/=. You could also do as I do and keep it in a cloud synced folder and create symbolic links for the important files, =early-init.el=, =init.el=, and =README.org= pointing to =~/.emacs.d/=.
+
+2. Edit the contents of the file [[file:.person-example.el][.person-example.el]] and rename it to =.person.el=.
+
+3. Symbolically link =.person.el= to your home directory. Either use the following command in a terminal, or use =dired=, where the key to create symbolic links is "S".
+
 #+begin_src shell
 ln -s ~/.emacs.d/.person.el ~/.person.el
 #+end_src
+
+After that on startup Emacs will first load =early-init.el=, then =init.el=, which itself [[https://orgmode.org/manual/Extracting-Source-Code.html][tangles]] and loads =README.org=.
 ** Early
 #+begin_src emacs-lisp
 (straight-use-package 'use-package)
