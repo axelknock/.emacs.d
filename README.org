@@ -1,14 +1,7 @@
 #+STARTUP: show2levels
 #+DESCRIPTION: This is my GNU/Emacs .init file. There are many like it, but this one is mine.
 #+FILETAGS: emacs settings
-** Explanation
-Critically, this file and my entire emacs configuration does not live in my =.emacs.d= directory. Both it, =init.el=, and =early-init.el= are all symlinked to that directory because I much prefer to host my emacs configuration in cloud-synced directory. That means that whenever I make changes to this file, I can simply restart the emacs daemon on my other machines to have the up-to-date configuration.
-
-The alternative to this of course is to simply use git and push and pull changes. But that would be more inconvenience than I want to incur for simple configuration.
-*** References
-[[https://github.com/bbatsov/emacs-lisp-style-guide][Emacs Lisp Style Guide]]
-[[info:elisp#Coding Conventions][Emacs Lisp Coding Conventions]]
-*** Customization & Usage
+** How to Use this Repository
 If you would like to use this configuration, then there are a couple of steps.
 
 1. First, clone this repository somewhere emacs will expect it to be. This could be your home folder, since on launch emacs looks for the contents of the =~/.emacs.d/=. You could also do as I do and keep it in a cloud synced folder and create symbolic links for the important files, =early-init.el=, =init.el=, and =README.org= pointing to =~/.emacs.d/=.
@@ -22,6 +15,9 @@ ln -s ~/.emacs.d/.person.el ~/.person.el
 #+end_src
 
 After that on startup Emacs will first load =early-init.el=, then =init.el=, which itself [[https://orgmode.org/manual/Extracting-Source-Code.html][tangles]] and loads =README.org=.
+*** References
+[[https://github.com/bbatsov/emacs-lisp-style-guide][Emacs Lisp Style Guide]]
+[[info:elisp#Coding Conventions][Emacs Lisp Coding Conventions]]
 ** Early
 #+begin_src emacs-lisp
 (straight-use-package 'use-package)
@@ -851,6 +847,7 @@ Otherwise run `affe-grep' with no argument."
 *** [[https://github.com/protesilaos/denote][denote]]
 #+begin_src emacs-lisp
 (use-package denote
+  :if my-denote-directory
   :ensure t
   :init
   (setq denote-directory my-denote-directory

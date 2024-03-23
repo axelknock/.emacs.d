@@ -2,7 +2,7 @@
 (defvar my-emacs-path         "YOUREMACSPATH")
 (defvar my-extra-auth-sources "YOURAUTHSOURCES")
 (defvar my-shell              "sh")
-(defvar my-denote-directory   "YOURDENOTEDIRECTORY")
+(defvar my-denote-directory   nil)
 (defvar my-org-directory      "YOURORGDIRECTORY")
 (defvar my-latitude           40.001)
 (defvar my-longitude          -80.001)
