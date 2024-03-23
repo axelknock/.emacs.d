@@ -1,6 +1,6 @@
 #+STARTUP: show2levels
-#+#+DESCRIPTION: This is my GNU/Emacs .init file. There are many like it, but this one is mine.
-#+filetags: emacs settings
+#+DESCRIPTION: This is my GNU/Emacs .init file. There are many like it, but this one is mine.
+#+FILETAGS: emacs settings
 ** Explanation
 Critically, this file and my entire emacs configuration does not live in my =.emacs.d= directory. Both it, =init.el=, and =early-init.el= are all symlinked to that directory because I much prefer to host my emacs configuration in cloud-synced directory. That means that whenever I make changes to this file, I can simply restart the emacs daemon on my other machines to have the up-to-date configuration.
 
@@ -1556,10 +1556,6 @@ Multiple cursors for emacs.
   (interactive)
   (push-mark)
   (mark-whole-buffer))
-#+end_src
-**** Kill word and space
-#+begin_src emacs-lisp
-
 #+end_src
 **** Kill buffer immediately
 #+begin_src emacs-lisp
