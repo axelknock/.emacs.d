@@ -1642,6 +1642,7 @@ Multiple cursors for emacs.
 *** My custom keybindings
 #+begin_src emacs-lisp
 (defsubst my/bind-key-dwim (key command &optional keymap)
+  "If KEY is bound to COMMAND, unbind it. Otherwise bind it."
   (let ((keymap (or nil keymap)))
     (if (equal (car (where-is-internal command)) (read-kbd-macro key))
         (unbind-key key keymap)
