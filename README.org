@@ -543,6 +543,9 @@ Tabspaces leverages tab-bar.el and project.el (both built into emacs 27+) to cre
 #+end_src
 ** Editing
 *** Structure
+#+begin_src emacs-lisp 
+(setq require-final-newline nil)
+#+end_src
 **** [[https://github.com/AmaiKinono/puni][GitHub - AmaiKinono/puni: Structured editing (soft deletion, expression navigating & manipulating) that supports many major modes out of the box.]]
 #+begin_src emacs-lisp
 (use-package puni
