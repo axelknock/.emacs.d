@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (defun narrow-to-region-indirect (start end &optional p)
   "Restrict editing in this buffer to the current region, indirectly.
 
