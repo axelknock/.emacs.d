@@ -1401,7 +1401,6 @@ This minor mode highlights indentation levels via font-lock. Indent widths are d
 (use-package circadian
   :ensure t
   :init
-  (add-hook 'circadian-after-load-theme-hook 'timu-macos-toggle-dark-light)
   (setq circadian-themes '((:sunrise . modus-operandi)
                            (:sunset  . modus-vivendi))
         calendar-latitude my-latitude
