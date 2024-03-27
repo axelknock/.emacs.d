@@ -477,6 +477,24 @@ if one already exists."
 #+begin_src emacs-lisp
 (use-package transient :ensure t)
 #+end_src
+**** [[https://github.com/abo-abo/hydra][Hydra]]
+#+begin_src emacs-lisp
+(use-package hydra :ensure t)
+(elpaca-wait)
+#+end_src
+***** [[https://github.com/jerrypnz/major-mode-hydra.el][Major-mode-hydra]]
+#+begin_src emacs-lisp
+(use-package major-mode-hydra
+  :ensure t
+  :init
+  (setq major-mode-hydra-title-generator
+        '(lambda (mode)
+           (s-concat (nerd-icons-icon-for-mode mode :v-adjust 0.05)
+                     " "
+                     (s-capitalized-words (s-replace "-" " " (symbol-name mode)))
+                     " commands")))
+  (load-directory (expand-file-name "hydras/" my-emacs-path)))
+#+end_src 
 ** Windows
 **** Toggle split
 #+begin_src emacs-lisp
@@ -874,7 +892,7 @@ Otherwise run `affe-grep' with no argument."
   :ensure t)
 #+end_src
 ** Artificial Intelligence
-*** Chat
+*** LLM Interface
 **** [[https://github.com/karthink/gptel][GitHub - karthink/gptel: A simple LLM client for Emacs]]
 #+begin_src emacs-lisp
 (use-package gptel
@@ -889,8 +907,9 @@ Otherwise run `affe-grep' with no argument."
   (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
   (add-to-list 'gptel-directives '(elisp-hacker . "You are an expert emacs lisp programmer and have written several widely used packages, admired for their utility despite their simplicity. Comments should be prepended with ;;")))
 #+end_src
-** Major Modes
-*** [[https://github.com/protesilaos/denote][denote]]
+** Knowledge Management
+*** Note taking
+**** [[https://github.com/protesilaos/denote][denote]]
 #+begin_src emacs-lisp
 (use-package denote
   :if my-denote-directory
@@ -904,6 +923,7 @@ Otherwise run `affe-grep' with no argument."
                                          (t . downcase)))
   (add-hook 'dired-mode-hook 'denote-dired-mode))
 #+end_src
+** Major Modes
 *** org
 #+begin_src emacs-lisp
 (setq org-directory my-org-directory
@@ -1010,7 +1030,7 @@ Otherwise run `affe-grep' with no argument."
 (use-package literate-calc-mode
   :ensure t)
 #+end_src
-**** increment number at point
+**** Increment number at point
 #+begin_src emacs-lisp
 (load-file (expand-file-name "artifacts/increment-number.el" my-emacs-path))
 #+end_src
@@ -1403,18 +1423,6 @@ Saves OS clipboard before wiping it.
 #+begin_src emacs-lisp
 (setq save-interprogram-paste-before-kill t)
 #+end_src
-*** Transpose DWIM
-#+begin_src emacs-lisp
-(defun transpose-dwim (&optional ARG)
-  (interactive)
-  (let ((universal    (or ARG 1))
-        (right-char (char-after))
-        (left-char (char-before)))
-    (cond ((and (= right-char 32) (= left-char 46)) (transpose-sentences universal))
-          ((= right-char 32) (transpose-words universal))
-          (t (transpose-chars universal)))))
-(bind-key "<remap> <transpose-chars>" 'transpose-dwim)
-#+end_src
 ** Selection
 *** whitespace
 **** [[https://github.com/nflath/hungry-delete][Hungry Delete]]
@@ -1590,7 +1598,7 @@ Multiple cursors for emacs.
               ("C-c a" . mc/insert-letters)))
 #+end_src
 ** My Custom commands
-**** Set mark and select whole buffer
+*** Set mark and select whole buffer
 #+begin_src emacs-lisp
 (defun my/set-mark-and-mark-whole-buffer ()
   "Set avy-retraceable mark at current point and mark whole buffer."
@@ -1598,13 +1606,13 @@ Multiple cursors for emacs.
   (push-mark)
   (mark-whole-buffer))
 #+end_src
-**** Kill buffer immediately
+*** Kill buffer immediately
 #+begin_src emacs-lisp
 (defun my/kill-buffer-immediately ()
   (interactive)
   (kill-buffer (buffer-name)))
 #+end_src
-**** Writing Mode
+*** Unfill paragraph
 #+begin_src emacs-lisp
 (defun unfill-paragraph ()
   "Takes a multi-line paragraph and makes it into a single line of text."
@@ -1612,21 +1620,32 @@ Multiple cursors for emacs.
   (let ((fill-column (point-max)))
     (fill-paragraph nil)))
 #+end_src
-**** Homegrown elisp functions
+*** Homegrown elisp functions
 #+begin_src emacs-lisp
 (defun my/load-homegrown ()
   "Load homegrown elisp functions"
   (load-directory (expand-file-name "homegrown" my-emacs-path)))
 (add-hook 'after-init-hook 'my/load-homegrown)
 #+end_src
-**** General aliases
+*** General aliases
 #+begin_src emacs-lisp
 (defalias 'lock-synchronize-scrollbar 'scroll-all-mode)
 (defalias 'open-link-at-point 'org-open-at-point-global)
 (defalias 'elisp-mode 'emacs-lisp-mode)
 #+end_src
+*** Transpose DWIM
+#+begin_src emacs-lisp
+(defun transpose-dwim (&optional ARG)
+  (interactive)
+  (let ((universal    (or ARG 1))
+        (right-char (char-after))
+        (left-char (char-before)))
+    (cond ((and (= right-char 32) (= left-char 46)) (transpose-sentences universal))
+          ((= right-char 32) (transpose-words universal))
+          (t (transpose-chars universal)))))
+(bind-key "<remap> <transpose-chars>" 'transpose-dwim)
+#+end_src
 ** Final Setup
-*** Reset garbage collection
 #+begin_src emacs-lisp
 (add-hook 'after-init-hook
           (lambda ()
@@ -1635,25 +1654,8 @@ Multiple cursors for emacs.
                      gc-cons-threshold)))
 #+end_src
 ** Keybinds
-**** [[https://github.com/abo-abo/hydra][Hydra]]
-#+begin_src emacs-lisp
-(use-package hydra :ensure t)
-(elpaca-wait)
-#+end_src
-***** [[https://github.com/jerrypnz/major-mode-hydra.el][Major-mode-hydra]]
-#+begin_src emacs-lisp
-(use-package major-mode-hydra
-  :ensure t
-  :init
-  (setq major-mode-hydra-title-generator
-        '(lambda (mode)
-           (s-concat (nerd-icons-icon-for-mode mode :v-adjust 0.05)
-                     " "
-                     (s-capitalized-words (s-replace "-" " " (symbol-name mode)))
-                     " commands")))
-  (load-directory (expand-file-name "hydras/" my-emacs-path)))
-#+end_src
-*** [[https://github.com/emacsorphanage/god-mode][GitHub - emacsorphanage/god-mode: Minor mode for God-like command entering]]
+*** Modal editing
+**** [[https://github.com/emacsorphanage/god-mode][GitHub - emacsorphanage/god-mode: Minor mode for God-like command entering]]
 #+begin_src emacs-lisp
 (use-package god-mode
   :after
