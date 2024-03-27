@@ -1,4 +1,6 @@
 #+STARTUP: show2levels
+#+AUTHOR: Lucian Knock
+#+TITLE: Lucianit
 #+DESCRIPTION: This is my GNU/Emacs .init file. There are many like it, but this one is mine.
 #+FILETAGS: emacs settings
 ** How to Use this Repository
