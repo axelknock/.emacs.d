@@ -736,7 +736,6 @@ Provides consult-line, which provides [[https://github.com/abo-abo/swiper][swipe
                               (consult--completion-filter-dispatch
                                pattern cands 'consult-location 'highlight)) filter-term))
     (consult-keep-lines nil)))
-(require 'consult)
 #+end_src
 **** [[https://github.com/minad/affe][affe]]
 #+begin_src emacs-lisp
