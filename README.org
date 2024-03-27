@@ -666,8 +666,6 @@ Writable grep buffer and apply the changes to files
 Provides consult-line, which provides [[https://github.com/abo-abo/swiper][swiper]]-like search through buffers. This means showing all lines with matching candidates.
 #+begin_src emacs-lisp
 (use-package consult
-  :after
-  (vertico bufferlo)
   :ensure t
   :init
   (setq consult-buffer-filter '("\\`\\*Async-native-compile-log\\*\\'"
