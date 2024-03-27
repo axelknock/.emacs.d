@@ -19,7 +19,7 @@ ln -s ~/.emacs.d/.person.el ~/.person.el
 After that on startup Emacs will first load =early-init.el=, then =init.el=, which itself [[https://orgmode.org/manual/Extracting-Source-Code.html][tangles]] and loads =README.org=.
 *** References
 - [[https://github.com/bbatsov/emacs-lisp-style-guide][Emacs Lisp Style Guide]]
-- [[info:elisp#Coding Conventions][Emacs Lisp Coding Conventions]]
+- [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Coding-Conventions.html][Emacs Lisp Coding Conventions]]
 ** Table of Contents :TOC_3:
   - [[#how-to-use-this-repository][How to Use this Repository]]
     - [[#references][References]]
