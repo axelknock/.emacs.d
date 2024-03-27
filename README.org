@@ -322,6 +322,15 @@ if one already exists."
   (interactive)
   (kill-new (buffer-name)))
 #+end_src
+*** Organization
+**** [[https://github.com/alphapapa/activities.el][GitHub - alphapapa/activities.el: Activities for Emacs (suspend and resume activities, i.e. frames/tabs and their windows, buffers)]]
+#+begin_src emacs-lisp 
+(use-package activities
+  :ensure t
+  :init
+  (activities-tabs-mode 1))
+#+end_src
+*** Special buffers
 **** Indirect Buffers
 [[https://demonastery.org/2013/04/emacs-narrow-to-region-indirect/#a-handy-shortcut][A Handy Shortcut]]
 #+begin_src emacs-lisp
