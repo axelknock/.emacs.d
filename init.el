@@ -51,4 +51,4 @@
     (load-file custom)))
 (set-face-attribute 'default nil :family my-selected-font :height 120)
 (set-face-attribute 'variable-pitch nil :family my-selected-font :height 120)
-(org-babel-load-file (expand-file-name "README.org" my-emacs-path) t)
+(org-babel-load-file (expand-file-name "README.org" my-emacs-path))
