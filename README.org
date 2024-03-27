@@ -195,8 +195,7 @@ if one already exists."
   :ensure t
   :init
   (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-etc-directory))
-  (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-var-directory))
-  (no-littering-theme-backups))
+  (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-var-directory)))
 (defvar no-littering-etc-directory (expand-file-name (concat my-emacs-path "config")))
 (defvar no-littering-var-directory (expand-file-name (concat my-emacs-path "data")))
 (defvar auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
