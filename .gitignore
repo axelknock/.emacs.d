@@ -8,3 +8,5 @@
 /backups/
 /.custom.el
 /.keybinds.el
+/var/
+*.elc
