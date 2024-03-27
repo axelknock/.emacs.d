@@ -391,11 +391,11 @@ if one already exists."
 *** Grouping buffers
 **** [[https://github.com/florommel/bufferlo][GitHub - florommel/bufferlo: frame/tab-local buffer lists in Emacs]]
 #+begin_src emacs-lisp :tangle no
-  (use-package bufferlo
-    :ensure t
-    :config
-    (bufferlo-mode 1)
-    (setq tab-bar-new-tab-choice "*scratch*"))
+(use-package bufferlo
+  :ensure t
+  :config
+  (bufferlo-mode 1)
+  (setq tab-bar-new-tab-choice "*scratch*"))
 #+end_src
 ** Help
 *** spell checking/grammar/lexicon
@@ -697,7 +697,7 @@ Provides consult-line, which provides [[https://github.com/abo-abo/swiper][swipe
 (defun my/consult-line-dwim ()
   "If region is selected, run `consult-line' with region as an argument.
 
-Otherwise run `consult-line' with no argument."
+  Otherwise run `consult-line' with no argument."
   (interactive)
   (if (use-region-p)
       (let ((search-term (buffer-substring (region-beginning) (region-end))))
@@ -708,7 +708,7 @@ Otherwise run `consult-line' with no argument."
 (defun my/consult-ripgrep-dwim (&optional arg)
   "If region is selected, run `consult-ripgrep' with region as an argument.
 
-Otherwise run `consult-ripgrep' with no argument."
+  Otherwise run `consult-ripgrep' with no argument."
   (interactive "P") 
   (if (use-region-p)
       (let ((search-term (buffer-substring (region-beginning) (region-end))))
