@@ -20,16 +20,13 @@ After that on startup Emacs will first load =early-init.el=, then =init.el=, whi
 [[info:elisp#Coding Conventions][Emacs Lisp Coding Conventions]]
 ** Early
 #+begin_src emacs-lisp
-(straight-use-package 'use-package)
-;; TODO switch to elpaca
-(use-package straight
-  :custom (straight-use-package-by-default t))
 (fset 'yes-or-no-p 'y-or-n-p)
-(setq default-tab-width 4)
+(defvar default-tab-width 4)
+(require 'project)
+(require 'dired)
 #+end_src
 ** Base
 #+begin_src emacs-lisp
-(use-package emacs)
 (setq
  ;; Explicitly set backups folder instead of keeping them in-place.
  backup-directory-alist my-emacs-backups
@@ -43,14 +40,14 @@ After that on startup Emacs will first load =early-init.el=, then =init.el=, whi
 
  fill-column    80      ; How long lines should be kept.
  comment-column 50      ; Where comment lines should start
-
- ;; Number of completion candidates after which cycling should be
- ;; enabled.
- completion-cycle-thresqhold 3
  ;; LSP necessity
  read-process-output-max 262144)
 
- ;; Indent w/spaces
+;; Number of completion candidates after which cycling should be
+;; enabled.
+(defvar completion-cycle-thresqhold 3)
+
+;; Indent w/spaces
 (setq-default indent-tabs-mode nil)
 
 ;; Enable the use of minibuffer in the minibuffer
@@ -61,12 +58,12 @@ After that on startup Emacs will first load =early-init.el=, then =init.el=, whi
 #+end_src
 ** Packages
 My package manager of choice is [[https://github.com/radian-software/straight.el][straight.el]]. It's bootstrapped/initialized directly within the init.el file because it needs to straight-load ~org-mode~. It needs to straight-load =org-mode= because most packages expect the latest version, and not the version that ships with Emacs.
-**** [[https://github.com/radian-software/straight.el][Straight.el]]
+**** Elpaca
 #+begin_src emacs-lisp
-(require 'package)
-(require 'project)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; Block until current queue processed.
+(elpaca-wait)
 #+end_src
+
 ** Start-up
 *** Load directory
 Snippet for loading of all elisp files in a directory.
@@ -85,22 +82,21 @@ Snippet for loading of all elisp files in a directory.
 *** Sharing
 **** [[https://github.com/defunkt/gist.el][Gist]]
 #+begin_src emacs-lisp
-(use-package gist
-  :ensure t)
+(use-package gist :ensure t)
 #+end_src
 ** Files
 *** Recent
 #+begin_src emacs-lisp
-(save-place-mode 1) ; Save cursor location in visited files
-(setq save-place-file my-save-place)
-(use-package recentf
-  :init
-  (setq recentf-keep '(file-remote-p file-readable-p)
-      recentf-auto-cleanup 600
-      recentf-max-saved-items 100
-      recentf-max-menu-items 25)
-  (recentf-mode 1)
-  (run-at-time (current-time) 300 'recentf-save-list))
+  (save-place-mode 1) ; Save cursor location in visited files
+  ;; (setq save-place-file my-save-place)
+  (use-package recentf
+    :init
+    (setq recentf-keep '(file-remote-p file-readable-p)
+          recentf-auto-cleanup 600
+          recentf-max-saved-items 100
+          recentf-max-menu-items 25)
+    (recentf-mode 1)
+    (run-at-time (current-time) 300 'recentf-save-list))
 #+end_src
 *** Dired
 #+begin_src emacs-lisp
@@ -121,14 +117,13 @@ Snippet for loading of all elisp files in a directory.
   (setq delete-by-moving-to-trash t)
   (setq dired-mouse-drag-files t)                   ; added in Emacs 29
   (setq mouse-drag-and-drop-region-cross-program t) ; added in Emacs 29
-  (setq dirvish-cache-dir my-dirvish-cache-dir)
   (setq dired-listing-switches
         "-l --almost-all --human-readable --time-style=long-iso --group-directories-first --no-group")
   (advice-add 'dirvish-dired-noselect-a
-            :before-until
-            (defun my/dirvish-dired-noselect-on-lists (&rest args)
-              (and (listp (cadr args))
-                  (apply (car args) (cdr args)))))
+              :before-until
+              (defun my/dirvish-dired-noselect-on-lists (&rest args)
+                (and (listp (cadr args))
+                     (apply (car args) (cdr args)))))
   (dirvish-peek-mode)
   (dirvish-override-dired-mode))
 #+end_src
@@ -137,39 +132,38 @@ Snippet for loading of all elisp files in a directory.
 Magit is a complete text-based user interface to [[https://git-scm.com/][Git]].
 #+begin_src emacs-lisp
 (use-package magit
+  :after (transient)
   :ensure t
   :hook
   (shell-mode . with-editor-export-editor)
   (eshell-mode . with-editor-export-editor)
   (vterm-mode . with-editor-export-editor)
   (term-exec . with-editor-export-editor)
-  :init
-  (defun project-magit ()
-    "Start Vterm in the current project's root directory.
+  :bind (:map magit-mode-map
+	      ("n" . 'magit-next-line)
+	      ("p" . 'magit-previous-line)
+	      ("C-n" . 'magit-section-forward)
+	      ("C-p" . 'magit-section-backward)))
+(defun project-magit ()
+  "Start Vterm in the current project's root directory.
 If a buffer already exists for running Vterm in the project's root,
 switch to it.  Otherwise, create a new Vterm buffer.
 With \\[universal-argument] prefix arg, create a new Vterm buffer even
 if one already exists."
-    (interactive)
-    (defvar magit-buffer-name)
-    (let* ((default-directory (project-root (project-current t)))
-           (magit-buffer-name (project-prefixed-buffer-name "magit"))
-           (magit-buffer (get-buffer magit-buffer-name)))
-      (if (and magit-buffer (not current-prefix-arg))
-          (pop-to-buffer magit-buffer (bound-and-true-p display-comint-buffer-action))
-        (call-interactively 'magit))))
-  (add-to-list 'project-switch-commands '(project-magit "Magit"))
-  :bind (:map magit-mode-map
-              ("n" . 'magit-next-line)
-              ("p" . 'magit-previous-line)
-              ("C-n" . 'magit-section-forward)
-              ("C-p" . 'magit-section-backward)))
+  (interactive)
+  (defvar magit-buffer-name)
+  (let* ((default-directory (project-root (project-current t)))
+         (magit-buffer-name (project-prefixed-buffer-name "magit"))
+         (magit-buffer (get-buffer magit-buffer-name)))
+    (if (and magit-buffer (not current-prefix-arg))
+        (pop-to-buffer magit-buffer (bound-and-true-p display-comint-buffer-action))
+      (call-interactively 'magit))))
+(add-to-list 'project-switch-commands '(project-magit "Magit"))
 #+end_src
 *** Large files
 **** [[https://github.com/m00natic/vlfi][vlfi]]
 #+begin_src emacs-lisp
-(use-package vlf
-  :ensure t)
+(use-package vlf :ensure t)
 #+end_src
 *** Permission/environment
 [[https://karthinks.com/software/fifteen-ways-to-use-embark/https://karthinks.com/software/fifteen-ways-to-use-embark/#open-a-file-as-root-without-losing-your-session][Sudo Find File]]
@@ -199,28 +193,28 @@ if one already exists."
 (use-package no-littering
   :ensure t
   :init
-  (setq no-littering-etc-directory (expand-file-name (concat my-emacs-path "config"))
-        no-littering-var-directory (expand-file-name (concat my-emacs-path "data"))
-        auto-save-file-name-transforms
-        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
   (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-etc-directory))
-  (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-var-directory)))
+  (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-var-directory))
+  (no-littering-theme-backups))
+(defvar no-littering-etc-directory (expand-file-name (concat my-emacs-path "config")))
+(defvar no-littering-var-directory (expand-file-name (concat my-emacs-path "data")))
+(defvar auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 #+end_src
 *** External programs
 **** [[https://www.emacswiki.org/emacs/OpenWith][Openwith]]
 #+begin_src emacs-lisp
-  (use-package openwith
-    :ensure t
-    :init
-    (openwith-mode 1))
+(use-package openwith
+  :ensure t
+  :init
+  (openwith-mode 1)
   (setq openwith-associations
-      (list
-       (list (openwith-make-extension-regexp
-              '("mpg" "mpeg" "mp3" "mp4" "m4v"
-                "avi" "wmv" "wav" "mov" "flv"
-                "ogm" "ogg" "mkv" "webm"))
-             "mpv"
-             '(file))))
+        (list
+         (list (openwith-make-extension-regexp
+                '("mpg" "mpeg" "mp3" "mp4" "m4v"
+                  "avi" "wmv" "wav" "mov" "flv"
+                  "ogm" "ogg" "mkv" "webm"))
+               "mpv"
+               '(file)))))
 #+end_src
 ** Buffers
 #+begin_src emacs-lisp
@@ -249,7 +243,7 @@ When called with a prefix, prompt for new buffer's name."
 #+end_src
 **** ibuffer
 #+begin_src emacs-lisp
-(setq ibuffer-expert t)
+(defvar ibuffer-expert t)
 (add-hook 'ibuffer-mode-hook 'hl-line-mode)
 #+end_src
 **** [[https://github.com/karthink/popper][popper]]
@@ -269,12 +263,12 @@ When called with a prefix, prompt for new buffer's name."
           flymake-diagnostics-buffer-mode
           ednc-view-mode
           "\\*eldoc\\*"))
+  (popper-mode 1)
+  (popper-echo-mode 1)
   :bind (:map popper-mode-map
               ("C-l" . popper-toggle)
               ("C-S-l" . popper-cycle)
               ("C-M-l" . popper-toggle-type)))
-(popper-mode 1)
-(popper-echo-mode 1)
 #+end_src
 **** [[https://melpa.org/#/immortal-scratch][Immortal Scratch]]
 This package provides a global minor mode `immortal-scratch-mode'
@@ -291,7 +285,8 @@ non-nil argument.
 #+end_src
 **** ediff
 #+begin_src emacs-lisp
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+(require 'ediff)
+(defvar ediff-window-setup-function 'ediff-setup-windows-plain)
 (defun ediff-copy-both-to-C ()
   (interactive)
   (ediff-copy-diff ediff-current-difference nil 'C nil
@@ -310,7 +305,6 @@ non-nil argument.
   (centered-cursor-mode)
   (corfu-mode)
   :init
-  ;; (load-file "~/Nextcloud/E/emacs/artifacts/client-side-vterm.el")
   ;; https://github.com/janEbert/dotfiles/blob/master/init.el
   (defun vterm--watch-for-password-prompt (process input &rest _args)
     "Prompt for password and send to PROCESS without echoing.
@@ -346,33 +340,39 @@ if one already exists."
       (vterm t))))
 
 (add-to-list 'project-switch-commands '(project-vterm "Vterm"))
+(defvar vterm-tramp-shells `(("docker" ,(format "/usr/bin/env %s" my-shell))))
+;; required to make tramp directory tracking work correctly
+;; https://github.com/akermu/emacs-libvterm/issues/36
+(defvar tramp-default-method "ssh")
+(defvar vterm-shell (format "/run/current-system/sw/bin/%s" my-shell))
+(defvar tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>].* *\\(^[\\[[0-9;]*[a-zA-Z] *\\)*")
 (setq shell-file-name my-shell
-      vterm-tramp-shells `(("docker" ,(format "/usr/bin/env %s" my-shell)))
-      vterm-shell (format "/run/current-system/sw/bin/%s" my-shell)
-      ;; required to make tramp directory tracking work correctly
-      ;; https://github.com/akermu/emacs-libvterm/issues/36
-      tramp-default-method "ssh"
-      tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>].* *\\(^[\\[[0-9;]*[a-zA-Z] *\\)*"
       vterm-buffer-name-string "%s")
 (add-hook 'vterm-mode-hook 'my/disable-ccm)
 (defun my/disable-hlm ()
   (hl-line-mode -1))
 (add-hook 'vterm-mode-hook 'my/disable-hlm)
 (add-hook 'vterm-mode-hook 'my/disable-cm)
-  #+end_src
+#+end_src
 **** org
 #+begin_src emacs-lisp
-(load-file "~/Nextcloud/E/emacs/artifacts/org-buffer-title-instead-of-filename.el")
+(load-file (expand-file-name "artifacts/org-buffer-title-instead-of-filename.el" my-emacs-path))
 #+end_src
 *** bookmarks
 #+begin_src emacs-lisp
 (defun my/bookmark-set-url (url)
   (interactive "sBookmark URL: ")
-  (if (assoc url bookmark-alist)
+  (let ((bkmks bookmark-alist))
+    (if (assoc url bkmks)
       (user-error "%s is already bookmarked" url)
     (push `(,url . ((handler . ,(lambda (bookmark)
                                   (browse-url (car bookmark))))))
-          bookmark-alist)))
+          bookmark-alist))))
+#+end_src
+** Menus
+**** Transient
+#+begin_src emacs-lisp
+(use-package transient :ensure t)
 #+end_src
 ** Windows
 **** Toggle split
@@ -389,59 +389,6 @@ if one already exists."
 #+end_src
 ** Tabs
 *** Grouping buffers
-**** [[https://github.com/mclear-tools/tabspaces][GitHub - mclear-tools/tabspaces]]
-Tabspaces leverages tab-bar.el and project.el (both built into emacs 27+) to create buffer-isolated workspaces (or “tabspaces”) that also integrate with your version-controlled projects.
-#+begin_src emacs-lisp :tangle no
-(use-package tabspaces
-  ;; use this next line only if you also use straight, otherwise ignore it.
-  :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
-  :commands (tabspaces-switch-or-create-workspace
-             tabspaces-open-or-create-project-and-workspace)
-  :custom
-  (tab-bar-new-tab-choice "*scratch*")
-  (tabspaces-session-auto-restore nil)
-  (tabspaces-session t)
-  (tabspaces-todo-file-name "todo.org")
-  (tabspaces-initialize-project-with-todo nil)
-  (tabspaces-include-buffers '("*scratch*" "*Messages*"))
-  (tabspaces-remove-to-default t)
-  (tabspaces-default-tab "Default")
-  (tabspaces-use-filtered-buffers-as-default t)
-  :init
-  ;; Filter Buffers for Consult-Buffer
-  (with-eval-after-load 'consult
-    ;; hide full buffer list (still available with "b" prefix)
-    (consult-customize consult--source-buffer :hidden t :default nil)
-    ;; set consult-workspace buffer list
-    (defvar consult--source-workspace
-      (list :name     "Workspace Buffers"
-            :narrow   ?w
-            :history  'buffer-name-history
-            :category 'buffer
-            :state    #'consult--buffer-state
-            :default  t
-            :items    (lambda () (consult--buffer-query
-                             :predicate #'tabspaces--local-buffer-p
-                             :sort 'visibility
-                             :as #'buffer-name)))
-
-      "Set workspace buffer list for consult-buffer.")
-    (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
-
-(defun my--tabspace-setup ()
-  "Set up tabspace at startup."
-  ;; Add *Messages* and *splash* to Tab \`Home\'
-  (tabspaces-mode 1)
-  (progn
-    (tab-bar-rename-tab "Home")
-    (when (get-buffer "*Messages*")
-      (set-frame-parameter nil
-                           'buffer-list
-                           (cons (get-buffer "*Messages*")
-                                 (frame-parameter nil 'buffer-list))))))
-
-(add-hook 'after-init-hook #'my--tabspace-setup)
-#+end_src
 **** [[https://github.com/florommel/bufferlo][GitHub - florommel/bufferlo: frame/tab-local buffer lists in Emacs]]
 #+begin_src emacs-lisp
 (use-package bufferlo
@@ -468,7 +415,7 @@ Tabspaces leverages tab-bar.el and project.el (both built into emacs 27+) to cre
 **** flyspell
 #+begin_src emacs-lisp
 (use-package flyspell
-  :ensure t)
+  :ensure nil)
 (setq-default isepll-program-name "aspell")
 #+end_src
 *** comments
@@ -485,6 +432,10 @@ Tabspaces leverages tab-bar.el and project.el (both built into emacs 27+) to cre
   :custom
   (helpful-switch-buffer-function 'switch-to-buffer)
   (helpful-max-buffers 1))
+#+end_src
+**** eldoc
+#+begin_src emacs-lisp
+(use-package eldoc :ensure t)
 #+end_src
 *** keys
 **** [[https://github.com/justbur/emacs-which-key][whichkey]]
@@ -533,13 +484,11 @@ Tabspaces leverages tab-bar.el and project.el (both built into emacs 27+) to cre
 #+end_src
 **** [[https://github.com/alezost/mwim.el][mwim]]
 #+begin_src emacs-lisp
-(use-package mwim
-  :ensure t)
+(use-package mwim :ensure t)
 #+end_src
 **** [[https://github.com/wyuenho/move-dup][move-dup]]
 #+begin_src emacs-lisp
-(use-package move-dup
-  :ensure t)
+(use-package move-dup :ensure t)
 #+end_src
 ** Editing
 *** Structure
@@ -554,7 +503,7 @@ Tabspaces leverages tab-bar.el and project.el (both built into emacs 27+) to cre
   (add-hook 'vterm-mode-hook #'puni-disable-puni-mode))
 #+end_src
 *** Parentheses
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (electric-pair-mode 1)
 #+end_src
 ** Completion
@@ -586,7 +535,7 @@ Adds useful information to the minibuffer
   (define-key embark-file-map (kbd "S") 'kt/sudo-find-file)
   (define-key embark-file-map (kbd "N") 'denote-rename-file)
   (define-key embark-region-map (kbd "G") 'gptel-send))
-  #+end_src
+#+end_src
 ***** Embark-Consult
 #+begin_src emacs-lisp
 (use-package embark-consult
@@ -601,25 +550,6 @@ Persist history over Emacs restarts. Vertico sorts by history position.
   :init
   (savehist-mode))
 #+end_src
-**** [[https://github.com/minad/vertico][Vertico]]
-Vertico provides a performant and minimalistic vertical completion UI based on the default completion system. The focus of Vertico is to provide a UI which behaves /correctly/ under all circumstances. By reusing the built-in facilities system, Vertico achieves /full compatibility/ with built-in Emacs completion commands and completion tables. 
-#+begin_src emacs-lisp
-(use-package vertico
-  :after
-  (orderless)
-  :custom
-  (vertico-cycle t)
-  :init
-  (vertico-mode)
-  ;; Enable vertico-multiform
-  (vertico-multiform-mode)
-  ;; Configure the display per completion category.
-  ;; Use the grid display for files and a buffer
-  ;; for the consult-grep commands.
-  (setq vertico-multiform-categories nil)
-  (setq vertico-resize nil
-        vertico-count 12))
-#+end_src
 **** [[https://github.com/oantolin/orderless][Orderless]]
 Completion candidate "emacs lisp" returns same results as "lisp emacs". Far more intuitive behavior.
 #+begin_src emacs-lisp
@@ -628,16 +558,35 @@ Completion candidate "emacs lisp" returns same results as "lisp emacs". Far more
   :custom
   (completion-styles '(orderless basic)))
 #+end_src
+**** [[https://github.com/minad/vertico][Vertico]]
+Vertico provides a performant and minimalistic vertical completion UI based on the default completion system. The focus of Vertico is to provide a UI which behaves /correctly/ under all circumstances. By reusing the built-in facilities system, Vertico achieves /full compatibility/ with built-in Emacs completion commands and completion tables. 
+#+begin_src emacs-lisp
+(use-package vertico
+  :ensure t
+  :after
+  (orderless)
+  :custom
+  (vertico-cycle t)
+  :init
+  ;; Enable vertico-multiform
+  ;; (vertico-multiform-mode)
+  ;; Configure the display per completion category.
+  ;; Use the grid display for files and a buffer
+  ;; for the consult-grep commands.
+  (setq vertico-multiform-categories nil)
+  (setq vertico-resize nil
+        vertico-count 12)
+  (vertico-mode))
+#+end_src
 **** [[https://github.com/minad/corfu][Corfu]]
 Serves completions from separate backends using emacs' native 'completion-at-point-functions'.
 #+begin_src emacs-lisp
 (use-package corfu
-  :straight (corfu 
-             :type git 
-             :host github 
-             :repo "minad/corfu")
+  :ensure (corfu 
+           :type git 
+           :host github 
+           :repo "minad/corfu")
   :init
-  ;; (load-directory "~/.emacs.d/straight/repos/corfu/extensions/")
   (corfu-history-mode)
   (corfu-popupinfo-mode)
   (global-corfu-mode)
@@ -653,7 +602,7 @@ Serves completions from separate backends using emacs' native 'completion-at-poi
     (when (where-is-internal #'completion-at-point (list (current-local-map)))
       ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
       (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
-                  corfu-popupinfo-delay nil)
+      	          corfu-popupinfo-delay nil)
       (corfu-mode 1)))
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 
@@ -662,8 +611,8 @@ Serves completions from separate backends using emacs' native 'completion-at-poi
 
   :hook
   (eshell . (lambda ()
-              (setq-local corfu-auto nil)
-              (corfu-mode)))
+      	      (setq-local corfu-auto nil)
+      	      (corfu-mode)))
 
   :custom
   (corfu-popupinfo-delay `(2.0 . 0.1))
@@ -694,14 +643,12 @@ Serves completions from separate backends using emacs' native 'completion-at-poi
              (add-to-list 'completion-at-point-functions ',capf)))
     (add-hook mode-hook hook-func)))
 (use-package cape
-  :after
-  (tempel)
+  :ensure t
   :custom
   (corfu-preview-current 'insert)
   :init
-  (when (< emacs-major-version 29)
-    (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
-    (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)))
+  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
+  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
 (defun org-completions ()
   (setq org-capfs '(cape-elisp-block cape-file))
   (dolist (capf org-capfs)
@@ -796,6 +743,7 @@ Otherwise run `consult-ripgrep' with no argument."
                               (consult--completion-filter-dispatch
                                pattern cands 'consult-location 'highlight)) filter-term))
     (consult-keep-lines nil)))
+(require 'consult)
 #+end_src
 **** [[https://github.com/minad/affe][affe]]
 #+begin_src emacs-lisp
@@ -841,8 +789,8 @@ Otherwise run `affe-grep' with no argument."
         (auth-source-pick-first-password :host "api.openai.com")
         gptel-default-mode 'org-mode)
   (gptel-make-anthropic "Claude"          ;Any name you want
-                        :stream t         ;Streaming responses
-                        :key (auth-source-pick-first-password :host "api.anthropic.com"))
+    :stream t         ;Streaming responses
+    :key (auth-source-pick-first-password :host "api.anthropic.com"))
   (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
   (add-to-list 'gptel-directives '(elisp-hacker . "You are an expert emacs lisp programmer and have written several widely used packages, admired for their utility despite their simplicity. Comments should be prepended with ;;")))
 #+end_src
@@ -941,10 +889,10 @@ Otherwise run `affe-grep' with no argument."
 ****** [[https://github.com/jdtsmith/org-modern-indent][org modern indent]]
 #+begin_src emacs-lisp
 (use-package org-modern-indent
-  :straight (org-modern-indent
-             :type git
-             :host github
-             :repo "jdtsmith/org-modern-indent")
+  :ensure (org-modern-indent
+           :type git
+           :host github
+           :repo "jdtsmith/org-modern-indent")
   :config
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 #+end_src
@@ -959,19 +907,7 @@ Otherwise run `affe-grep' with no argument."
 **** [[https://github.com/vedang/pdf-tools][pdf-tools]]
 #+begin_src emacs-lisp
 (use-package pdf-tools
-  :ensure t
-  :init
-  (pdf-tools-install))
-#+end_src
-***** [[https://github.com/007kevin/pdf-view-restore][pdf-view-restore]]
-Support for opening last known pdf position in pdf-view-mode provided by pdf-tools.
-#+begin_src emacs-lisp
-(use-package pdf-view-restore
-  :after (pdf-tools)
-  :config
-  (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
-  :custom
-  (pdf-view-restore-filename (expand-file-name "data/.pdf-view-restore" my-emacs-path)))
+  :ensure t)
 #+end_src
 *** calc
 **** Literate calc mode
@@ -996,12 +932,16 @@ Support for opening last known pdf position in pdf-view-mode provided by pdf-too
 ** Languages
 *** Treesitter
 **** [[https://github.com/renzmann/treesit-auto][treesit-auto]]
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package treesit-auto
   :config
   (global-treesit-auto-mode 1))
 #+end_src
 *** Language Server Protocol :language_server_protocol:
+**** Jsonrpc
+#+begin_src emacs-lisp
+(use-package jsonrpc :ensure t)
+#+end_src
 **** [[https://github.com/joaotavora/eglot][Eglot]] :syntax:
 #+begin_src emacs-lisp
 (use-package eglot
@@ -1027,7 +967,7 @@ Support for opening last known pdf position in pdf-view-mode provided by pdf-too
 *** markdown
 #+begin_src emacs-lisp
 (use-package markdown-mode :ensure t)
-(setq org-web-tools--pandoc-no-wrap-option t)
+(defvar org-web-tools--pandoc-no-wrap-option t)
 (custom-set-variables '(markdown-command "pandoc --wrap=none"))
 #+end_src
 *** latex :latex:
@@ -1092,8 +1032,8 @@ web-mode.el is an autonomous emacs major-mode for editing web templates.
       (setq-local comment-start "{% endcomment %}")))
   ;; enable Emmet's abbreviation in web mode
   (add-hook 'web-mode-hook #'emmet-mode)
-(add-hook 'web-mode-hook 'my/disable-electric-pair-mode)
-(require 'sgml-mode)
+  (add-hook 'web-mode-hook 'my/disable-electric-pair-mode)
+  (require 'sgml-mode)
   (add-hook 'web-mode-hook 'sgml-electric-tag-pair-mode)
   (add-hook 'web-mode-hook 'my/set-liquid-comments))
 #+end_src
@@ -1192,10 +1132,6 @@ web-mode.el is an autonomous emacs major-mode for editing web templates.
 #+end_src
 ** Visual
 *** font
-**** Select font
-#+begin_src emacs-lisp
-(set-face-attribute 'org-modern-symbol nil :family my-selected-font :height 120)
-#+end_src
 **** [[https://github.com/mickeynp/ligature.el][GitHub - mickeynp/ligature.el: Display typographical ligatures in Emacs]]
 #+begin_src emacs-lisp
 (use-package ligature
@@ -1318,8 +1254,7 @@ This minor mode highlights indentation levels via font-lock. Indent widths are d
 *** Modeline
 #+begin_src emacs-lisp
 (size-indication-mode)
-(setq display-time-24hr-format t
-      display-time-use-mail-icon t)
+(setq display-time-24hr-format t)
 (display-time)
 #+end_src
 **** [[https://github.com/seagle0128/doom-modeline][doom modeline]]
@@ -1574,11 +1509,6 @@ Multiple cursors for emacs.
 #+end_src
 **** Writing Mode
 #+begin_src emacs-lisp
-(defun my/writing-mode ()
-  "'olivetti-mode', 'flyspell-mode', 'org-modern-mode'."
-  (interactive)
-  (olivetti-mode)
-  (flyspell-mode))
 (defun unfill-paragraph ()
   "Takes a multi-line paragraph and makes it into a single line of text."
   (interactive)
@@ -1587,10 +1517,10 @@ Multiple cursors for emacs.
 #+end_src
 **** Homegrown elisp functions
 #+begin_src emacs-lisp
-  (defun my/load-homegrown ()
-    "Load homegrown elisp functions"
-    (load-directory (expand-file-name "homegrown" my-emacs-path)))
-  (add-hook 'after-init-hook 'my/load-homegrown)
+(defun my/load-homegrown ()
+  "Load homegrown elisp functions"
+  (load-directory (expand-file-name "homegrown" my-emacs-path)))
+(add-hook 'after-init-hook 'my/load-homegrown)
 #+end_src
 **** General aliases
 #+begin_src emacs-lisp

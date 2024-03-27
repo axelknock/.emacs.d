@@ -1,24 +1,4 @@
 ;; -*- lexical-binding: t; no-byte-compile: t -*-
-;; Straight bootstrap
-(setq straight-repository-branch "develop")
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-(setq native-comp-async-report-warnings-errors nil)
-(setq straight-use-package-by-default t)
-(straight-use-package 'project)
-(straight-use-package 'package)
-(straight-use-package 'org)
-;; Begin elpaca bootstrap
 (defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -57,6 +37,11 @@
     (load "./elpaca-autoloads")))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
+(elpaca org)
+(elpaca elpaca-use-package
+  ;; Enable use-package :ensure support for Elpaca.
+  (elpaca-use-package-mode))
+(elpaca-wait)
 ;; End elpaca bootstrap
 (global-auto-revert-mode)
 (load-file "./.person.el")
