@@ -298,7 +298,7 @@ non-nil argument.
 (setq ediff-long-help-message-merge "\np,DEL -previous diff |     | -vert/horiz split   |  x -copy buf X's region to C\nn,SPC -next diff     |     h -highlighting       |  d -copy both regions to C\nj -jump to diff      |     @ -auto-refinement    |  r -restore buf C's old diff\ngx -goto X's point   |    ## -ignore whitespace  |  * -refine current region\nC-l -recenter        | #f/#h -focus/hide regions |  ! -update diff regions\nv/V -scroll up/dn    |     X -read-only in buf X |  + -combine diff regions\n</> -scroll lt/rt    |     m -wide display       | wx -save buf X\n~ -swap variants     |     s -shrink window C    | wd -save diff output\n                     |  $$ -show clashes only    |  / -show/hide ancestor buff\n                     |  $* -skip changed regions |  & -merge w/new default\n")
 #+end_src
 **** [[https://github.com/akermu/emacs-libvterm][vterm]]
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package vterm
   :ensure t
   :after
@@ -353,6 +353,14 @@ if one already exists."
   (hl-line-mode -1))
 (add-hook 'vterm-mode-hook 'my/disable-hlm)
 (add-hook 'vterm-mode-hook 'my/disable-cm)
+#+end_src
+**** [[https://codeberg.org/akib/emacs-eat][akib/emacs-eat: Emulate A Terminal, in a region, in a buffer and in Eshell - Codeberg.org]]
+#+begin_src emacs-lisp
+(use-package eat
+  :ensure t
+  :after
+  (centered-cursor-mode))
+(add-hook 'eat-mode-hook 'my/disable-ccm)
 #+end_src
 **** org
 #+begin_src emacs-lisp
