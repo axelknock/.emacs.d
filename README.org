@@ -668,18 +668,26 @@ Provides consult-line, which provides [[https://github.com/abo-abo/swiper][swipe
 (use-package consult
   :ensure t
   :init
-  (setq consult-buffer-filter '("\\`\\*Async-native-compile-log\\*\\'"
-                                "\\`\\*straight-process\\*\\'"
-                                "\\`\\*straight-byte-compilation\\*\\'"
-                                "\\`\\*company-diag\\*\\'"
-                                "\\` "
-                                "\\`\\*Completions\\*\\'"
-                                "\\`\\*Flymake log\\*\\'"
-                                "\\`\\*Semantic SymRef\\*\\'"
-                                "\\`\\*Ediff Registry\\*\\'"
-                                "Dirvish-preview-"
-                                "\\`\\*tramp/.*\\*\\'"
-                                "lsp"))
+  (defvar consult-buffer-filter '("\\`\\*Async-native-compile-log\\*\\'"
+                                  "\\`\\*straight-process\\*\\'"
+                                  "\\`\\*straight-byte-compilation\\*\\'"
+                                  "\\`\\*company-diag\\*\\'"
+                                  "\\` "
+                                  "\\`\\*Completions\\*\\'"
+                                  "\\`\\*Flymake log\\*\\'"
+                                  "\\`\\*Semantic SymRef\\*\\'"
+                                  "\\`\\*Ediff Registry\\*\\'"
+                                  "Dirvish-preview-"
+                                  "\\`\\*tramp/.*\\*\\'"
+                                  "lsp"))
+  ;; (load-file (expand-file-name "homegrown/my-consult-buffer-sources.el" my-emacs-path))
+  ;; (defvar consult-buffer-sources '(my/consult--source-file-register
+  ;;                                my/consult--source-hidden-buffer
+  ;;                                my/consult--source-recent-file
+  ;;                                my/consult--source-modified-buffer
+  ;;                                my/consult--source-bookmark
+  ;;                                my/consult--source-local-buffer
+  ;;                                my/consult--source-buffer))
   :custom
   (xref-show-xrefs-function #'consult-xref)
   (xref-show-definitions-function #'consult-xref)
