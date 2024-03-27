@@ -365,10 +365,10 @@ if one already exists."
   (interactive "sBookmark URL: ")
   (let ((bkmks bookmark-alist))
     (if (assoc url bkmks)
-      (user-error "%s is already bookmarked" url)
-    (push `(,url . ((handler . ,(lambda (bookmark)
-                                  (browse-url (car bookmark))))))
-          bookmark-alist))))
+        (user-error "%s is already bookmarked" url)
+      (push `(,url . ((handler . ,(lambda (bookmark)
+                                    (browse-url (car bookmark))))))
+            bookmark-alist))))
 #+end_src
 ** Menus
 **** Transient
