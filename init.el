@@ -44,7 +44,7 @@
 (elpaca-wait)
 ;; End elpaca bootstrap
 (global-auto-revert-mode)
-(load-file "./.person.el")
+(load-file "~/.person.el")
 (let ((custom (expand-file-name ".custom.el" my-emacs-path)))
   (when (file-exists-p custom)
     (setq custom-file custom)
