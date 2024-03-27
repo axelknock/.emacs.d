@@ -568,7 +568,8 @@ Vertico provides a performant and minimalistic vertical completion UI based on t
 Serves completions from separate backends using emacs' native 'completion-at-point-functions'.
 #+begin_src emacs-lisp
 (use-package corfu
-  :ensure (corfu 
+  :after (consult)
+  :ensure (corfu
            :type git 
            :host github 
            :repo "minad/corfu")
