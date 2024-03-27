@@ -87,16 +87,17 @@ Snippet for loading of all elisp files in a directory.
 ** Files
 *** Recent
 #+begin_src emacs-lisp
-  (save-place-mode 1) ; Save cursor location in visited files
-  ;; (setq save-place-file my-save-place)
-  (use-package recentf
-    :init
-    (setq recentf-keep '(file-remote-p file-readable-p)
-          recentf-auto-cleanup 600
-          recentf-max-saved-items 100
-          recentf-max-menu-items 25)
-    (recentf-mode 1)
-    (run-at-time (current-time) 300 'recentf-save-list))
+(save-place-mode 1) ; Save cursor location in visited files
+(savehist-mode 1)   ; Save minibuffer history
+;; (setq save-place-file my-save-place)
+(use-package recentf
+  :init
+  (setq recentf-keep '(file-remote-p file-readable-p)
+        recentf-auto-cleanup 600
+        recentf-max-saved-items 100
+        recentf-max-menu-items 25)
+  (recentf-mode 1)
+  (run-at-time (current-time) 300 'recentf-save-list))
 #+end_src
 *** Dired
 #+begin_src emacs-lisp
@@ -542,13 +543,6 @@ Adds useful information to the minibuffer
   :after
   (consult)
   :ensure t)
-#+end_src
-**** [[https://github.com/emacs-mirror/emacs/blob/master/lisp/savehist.el][Savehist]]
-Persist history over Emacs restarts. Vertico sorts by history position.
-#+begin_src emacs-lisp
-(use-package savehist
-  :init
-  (savehist-mode))
 #+end_src
 **** [[https://github.com/oantolin/orderless][Orderless]]
 Completion candidate "emacs lisp" returns same results as "lisp emacs". Far more intuitive behavior.
