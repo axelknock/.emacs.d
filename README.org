@@ -826,6 +826,7 @@ Provides consult-line, which provides [[https://github.com/abo-abo/swiper][swipe
   :bind
   (:map dired-mode-map
         ("C-s" . consult-find)))
+(elpaca-wait)
 (defun my/consult-line-dwim ()
   "If region is selected, run `consult-line' with region as an argument.
 
