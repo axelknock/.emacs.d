@@ -391,20 +391,12 @@ if one already exists."
 ** Tabs
 *** Grouping buffers
 **** [[https://github.com/florommel/bufferlo][GitHub - florommel/bufferlo: frame/tab-local buffer lists in Emacs]]
-#+begin_src emacs-lisp
-(use-package bufferlo
-  :ensure t
-  :config
-  (bufferlo-mode 1))
-(load-file (expand-file-name "homegrown/my-consult-buffer-sources.el" my-emacs-path))
-(setq consult-buffer-sources '(my/consult--source-file-register
-                               my/consult--source-hidden-buffer
-                               my/consult--source-recent-file
-                               my/consult--source-modified-buffer
-                               my/consult--source-bookmark
-                               my/consult--source-local-buffer
-                               my/consult--source-buffer))
-(setq tab-bar-new-tab-choice "*scratch*")
+#+begin_src emacs-lisp :tangle no
+  (use-package bufferlo
+    :ensure t
+    :config
+    (bufferlo-mode 1)
+    (setq tab-bar-new-tab-choice "*scratch*"))
 #+end_src
 ** Help
 *** spell checking/grammar/lexicon
