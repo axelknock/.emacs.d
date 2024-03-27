@@ -1,22 +1,20 @@
 { config, pkgs, ... }:
-
+let
+  myEmacs = with pkgs; (emacsPackagesFor emacs29).emacsWithPackages (epkgs: with epkgs; [
+    treesit-grammars.with-all-grammars
+  ]);
+in
 {
   environment.systemPackages = (with pkgs; [
-    ((emacsPackagesFor emacs29).emacsWithPackages (epkgs: [
-      epkgs.vterm
-      epkgs.treesit-grammars.with-all-grammars
-    ]))
-    epdfview                            # emacs pdf-tools requirement
-    ffmpegthumbnailer                   # emacs dirvish requirement
-    mediainfo                           # emacs dirvish requirement
-    mpg123                              # emacs dirvish requirement
+    myEmacs                             # overlayed emacs version 29
+    epdfview                            # pdf-tools requirement
+    ffmpegthumbnailer                   # dirvish requirement
+    mediainfo                           # dirvish requirement
+    mpg123                              # dirvish requirement
   ]);
   services.emacs = {
     enable = true;
-    package = (with pkgs; ((emacsPackagesFor emacs29).emacsWithPackages (epkgs: [
-        epkgs.vterm
-        epkgs.treesit-grammars.with-all-grammars
-    ])));
+    package = myEmacs;
     startWithGraphical = true;
   };
 }
