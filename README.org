@@ -235,7 +235,7 @@ Magit is a complete text-based user interface to [[https://git-scm.com/][Git]].
   :hook
   (shell-mode . with-editor-export-editor)
   (eshell-mode . with-editor-export-editor)
-  (vterm-mode . with-editor-export-editor)
+  (eat-mode . with-editor-export-editor)
   (term-exec . with-editor-export-editor)
   :bind (:map magit-mode-map
 	      ("n" . 'magit-next-line)
@@ -363,7 +363,7 @@ When called with a prefix, prompt for new buffer's name."
           eshell-mode
           shell-mode
           term-mode
-          vterm-mode
+          eat-mode
           inferior-python-mode
           messages-buffer-mode
           flymake-diagnostics-buffer-mode
