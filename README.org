@@ -465,8 +465,10 @@ if one already exists."
 (use-package eat
   :ensure t
   :after
-  (centered-cursor-mode))
-(add-hook 'eat-mode-hook 'my/disable-ccm)
+  (centered-cursor-mode)
+  :init
+  (defvar eat-kill-buffer-on-exit t)
+  (add-hook 'eat-mode-hook 'my/disable-ccm))
 #+end_src
 **** org
 #+begin_src emacs-lisp
