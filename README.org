@@ -233,11 +233,6 @@ Magit is a complete text-based user interface to [[https://git-scm.com/][Git]].
 (use-package magit
   :after (transient)
   :ensure t
-  :hook
-  (shell-mode . with-editor-export-editor)
-  (eshell-mode . with-editor-export-editor)
-  (eat-mode . with-editor-export-editor)
-  (term-exec . with-editor-export-editor)
   :bind (:map magit-mode-map
 	      ("n" . 'magit-next-line)
 	      ("p" . 'magit-previous-line)
