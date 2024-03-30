@@ -284,14 +284,14 @@ if one already exists."
 *** Autosave/Lock files
 **** No-littering
 #+begin_src emacs-lisp
+(defvar no-littering-etc-directory (expand-file-name "config" my-emacs-path))
+(defvar no-littering-var-directory (expand-file-name "data" my-emacs-path))
 (use-package no-littering
   :ensure t
   :init
   (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-etc-directory))
-  (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-var-directory)))
-(defvar no-littering-etc-directory (expand-file-name (concat my-emacs-path "config")))
-(defvar no-littering-var-directory (expand-file-name (concat my-emacs-path "data")))
-(defvar auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+  (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-var-directory))
+  (defvar auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+end_src
 *** External programs
 **** [[https://www.emacswiki.org/emacs/OpenWith][Openwith]]
