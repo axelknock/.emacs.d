@@ -324,7 +324,42 @@ if one already exists."
 (use-package activities
   :ensure t
   :init
-  (activities-tabs-mode 1))
+  (defvar activities-kill-buffers t)
+  (defvar activities-always-persist nil)
+  (activities-tabs-mode 1)
+  (defun activities-local-buffer-p (buffer)
+    "Returns non-nil if BUFFER is present in `activities-current'."
+    (when (activities-current)
+      (memq buffer (activities-tabs--tab-parameter 'activities-buffer-list (activities-tabs--tab (activities-current))))))
+
+  (defvar my-consult--source-activities-buffer
+    `(:name "Activities Buffers"
+            :narrow   ?a
+            :category buffer
+            :face     consult-buffer
+            :history  buffer-name-history
+            :state    ,#'consult--buffer-state
+            :default  t
+            :items ,(lambda () (consult--buffer-query
+                                :predicate #'activities-local-buffer-p
+                                :sort 'visibility
+                                :as #'buffer-name)))
+    "Activities local buffers candidate source for `consult-buffer'.")
+
+  (defvar my-consult--source-all-buffers
+    `(:name "All Buffers"
+            :narrow   ?b
+            :category buffer
+            :face     consult-buffer
+            :history  buffer-name-history
+            :state    ,#'consult--buffer-state
+            :enabled ,(lambda () (not (activities-current)))
+            :items ,(lambda () (consult--buffer-query :sort 'visibility
+                                                      :as #'consult--buffer-pair)))
+    "All buffers candidate source for `consult-buffer'.")
+  (delete 'consult--source-buffer consult-buffer-sources)
+  (add-to-list 'consult-buffer-sources 'my-consult--source-all-buffers)
+  (add-to-list 'consult-buffer-sources 'my-consult--source-activities-buffer))
 #+end_src
 *** Special buffers
 **** Indirect Buffers
