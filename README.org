@@ -1382,7 +1382,10 @@ Emacs minor mode to automatically balance window margins
 Keeps viewport centered around cursor.
 #+begin_src emacs-lisp
 (use-package centered-cursor-mode
-  :ensure t
+  :ensure (centered-cursor-mode
+           :host github
+           :repo "andre-r/centered-cursor-mode.el"
+           :branch "dev")
   :init
   (global-centered-cursor-mode)
   (defun my/disable-ccm ()
