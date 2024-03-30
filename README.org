@@ -464,12 +464,29 @@ if one already exists."
 **** [[https://codeberg.org/akib/emacs-eat][akib/emacs-eat: Emulate A Terminal, in a region, in a buffer and in Eshell - Codeberg.org]]
 #+begin_src emacs-lisp
 (use-package eat
-  :ensure t
+  :ensure (eat
+           :host codeberg
+           :repo "vifon/emacs-eat"
+           :branch "fish-integration")
   :after
   (centered-cursor-mode)
   :init
+  (defun rename-buffer-to-pwd ()
+    (rename-buffer ))
+  (defun my/eat ()
+    (interactive)
+    (let* ((pwd-buffer-name (string-replace "Directory " "" (pwd)))
+           (switch-to (get-buffer pwd-buffer-name)))
+      (if switch-to
+          (switch-to-buffer switch-to)
+        (let ((rename-to (lambda ()
+                           (rename-buffer pwd-buffer-name))))
+          (add-hook 'eat-mode-hook 'rename-to)
+          (eat nil 1)
+          (remove-hook 'eat-mode-hook 'rename-to)))))
   (defvar eat-kill-buffer-on-exit t)
-  (add-hook 'eat-mode-hook 'my/disable-ccm))
+  (add-hook 'eat-mode-hook 'my/disable-ccm)
+  (add-hook 'eat-mode-hook 'rename-buffer-to-pwd))
 #+end_src
 **** org
 #+begin_src emacs-lisp
