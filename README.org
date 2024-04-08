@@ -1005,7 +1005,10 @@ Otherwise run `affe-grep' with no argument."
 #+begin_src emacs-lisp
 (use-package denote
   :if my-denote-directory
-  :ensure t
+  :ensure (denote
+           :host github
+           :repo "axelknock/denote"
+           :branch "customize-front-matter-formatter")
   :init
   (setq denote-directory my-denote-directory
         denote-file-type 'org
