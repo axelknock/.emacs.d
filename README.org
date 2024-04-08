@@ -410,8 +410,15 @@ When called with a prefix, prompt for new buffer's name."
 **** [[https://github.com/karthink/popper][popper]]
 #+begin_src emacs-lisp
 (use-package popper
+  :after (shackle)
   :ensure t
   :init
+  (defun popper-group-by-activities ()
+    "Returns name of current activity"
+    (let ((activity (activities-current)))
+      (if activity
+          (slot-value activity 'name)
+        "Non-activity")))
   (setq popper-reference-buffers
         '(help-mode
           helpful-mode
@@ -420,16 +427,17 @@ When called with a prefix, prompt for new buffer's name."
           term-mode
           eat-mode
           inferior-python-mode
+          geiser-repl-mode
           messages-buffer-mode
           flymake-diagnostics-buffer-mode
           ednc-view-mode
-          "\\*eldoc\\*"))
+          django-commands-server-mode
+          "\\*eldoc\\*")
+        ;; popper-group-function #'popper-group-by-activities
+        popper-display-control nil)
   (popper-mode 1)
   (popper-echo-mode 1)
-  :bind (:map popper-mode-map
-              ("C-l" . popper-toggle)
-              ("C-S-l" . popper-cycle)
-              ("C-M-l" . popper-toggle-type)))
+  (setq popper-display-control nil))
 #+end_src
 **** [[https://melpa.org/#/immortal-scratch][Immortal Scratch]]
 This package provides a global minor mode `immortal-scratch-mode'
@@ -592,6 +600,22 @@ if one already exists."
   :init
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
         aw-scope 'frame))
+#+end_src
+**** [[https://depp.brause.cc/shackle/][shackle: Enforce rules for popup windows]]
+#+begin_src emacs-lisp
+(use-package shackle
+  :ensure t
+  :init
+  (setq shackle-default-alignment 'below
+        shackle-select-reused-windows t
+        shackle-rules '((django-commands-server-mode :popup t :align right  :size 0.33 :select t :inhibit-window-quit nil)
+                        (eat-mode                    :popup t :align right  :size 0.33 :select t :inhibit-window-quit nil)
+                        (inferior-python-mode        :popup t :align right  :size 0.33 :select t :inhibit-window-quit nil)
+                        (geiser-repl-mode            :popup t :align right  :size 0.33 :select t :inhibit-window-quit nil)
+                        (helpful-mode                :popup t :align right  :size 0.33 :select t)
+                        (help-mode                   :popup t :align right  :size 0.33 :select t)
+                        (messages-buffer-mode        :popup t :align bottom :size 0.15)))
+  (shackle-mode 1))
 #+end_src
 ** Help
 *** spell checking/grammar/lexicon
