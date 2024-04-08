@@ -1516,9 +1516,7 @@ This minor mode highlights indentation levels via font-lock. Indent widths are d
   (setq yas-snippet-dirs `(,(expand-file-name "snippets" my-emacs-path)))
   :ensure t
   :init
-  (add-hook 'prog-mode-hook #'yas-minor-mode)
-  (add-hook 'org-mode-hook  #'yas-minor-mode)
-  (add-hook 'markdown-mode-hook  #'yas-minor-mode))
+  (yas-global-mode))
 #+end_src
 ***** [[https://github.com/elken/yasnippet-capf][GitHub - elken/yasnippet-capf: Completion-At-Point Extension for YASnippet]]
 #+begin_src emacs-lisp
