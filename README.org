@@ -1250,6 +1250,14 @@ web-mode.el is an autonomous emacs major-mode for editing web templates.
 #+begin_src emacs-lisp
 (use-package yaml-mode :ensure t)
 #+end_src
+*** Python
+**** [[https://github.com/wbolster/emacs-python-black][GitHub - wbolster/emacs-python-black: Emacs package to reformat Python using black-macchiato]]
+#+begin_src emacs-lisp
+(use-package python-black
+  :ensure t
+  :init
+  (add-hook 'python-mode-hook 'python-black-on-save-mode))
+#+end_src
 *** lua
 #+begin_src emacs-lisp :tangle no
 (use-package lua-mode :ensure t)
