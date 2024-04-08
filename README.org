@@ -988,7 +988,9 @@ Otherwise run `affe-grep' with no argument."
 **** [[https://github.com/karthink/gptel][GitHub - karthink/gptel: A simple LLM client for Emacs]]
 #+begin_src emacs-lisp
 (use-package gptel
-  :ensure t
+  :ensure (gptel
+           :host github
+           :repo "axelknock/gptel")
   :init
   (setq gptel-api-key
         (auth-source-pick-first-password :host "api.openai.com")
