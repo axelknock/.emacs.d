@@ -336,33 +336,54 @@ if one already exists."
       (memq buffer (activities-tabs--tab-parameter 'activities-buffer-list (activities-tabs--tab (activities-current))))))
 
   (defvar my-consult--source-activities-buffer
-    `(:name "Activities Buffers"
+    `(:name "Current activity"
             :narrow   ?a
             :category buffer
             :face     consult-buffer
             :history  buffer-name-history
             :state    ,#'consult--buffer-state
-            :default  t
             :items ,(lambda () (consult--buffer-query
                                 :predicate #'activities-local-buffer-p
                                 :sort 'visibility
                                 :as #'buffer-name)))
     "Activities local buffers candidate source for `consult-buffer'.")
 
+  (defvar my-consult--source-non-activities-buffer
+    `(:name "Other Buffers"
+            :narrow   ?o
+            :hidden   t
+            :category buffer
+            :face     consult-buffer
+            :history  buffer-name-history
+            :state    ,#'consult--buffer-state
+            :items ,(lambda () (consult--buffer-query
+                                :predicate '(lambda (buffer) (not (activities-local-buffer-p buffer)))
+                                :sort 'visibility
+                                :as #'buffer-name)))
+    "Activities non-local buffers candidate source for `consult-buffer'.")
+(defun my/test-all-buffers-source ()
+  (let ((activity (activities-current)))
+    (if activity
+        (message (slot-value activity 'name))
+      (message "no activity"))))
+
   (defvar my-consult--source-all-buffers
     `(:name "All Buffers"
+            :default  t
             :narrow   ?b
             :category buffer
             :face     consult-buffer
             :history  buffer-name-history
             :state    ,#'consult--buffer-state
-            :enabled ,(lambda () (not (activities-current)))
-            :items ,(lambda () (consult--buffer-query :sort 'visibility
+            :enabled  ,(lambda () (not (activities-current)))
+            :items    ,(lambda () (consult--buffer-query :sort 'visibility
                                                       :as #'consult--buffer-pair)))
     "All buffers candidate source for `consult-buffer'.")
+  
   (delete 'consult--source-buffer consult-buffer-sources)
   (add-to-list 'consult-buffer-sources 'my-consult--source-all-buffers)
-  (add-to-list 'consult-buffer-sources 'my-consult--source-activities-buffer))
+  (add-to-list 'consult-buffer-sources 'my-consult--source-activities-buffer)
+  (add-to-list 'consult-buffer-sources 'my-consult--source-non-activities-buffer))
 #+end_src
 *** Special buffers
 **** Indirect Buffers
