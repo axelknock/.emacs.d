@@ -156,12 +156,15 @@ After that on startup Emacs will first load =early-init.el=, then =init.el=, whi
 #+end_src
 ** Packages
 My package manager of choice is [[https://github.com/radian-software/straight.el][straight.el]]. It's bootstrapped/initialized directly within the init.el file because it needs to straight-load ~org-mode~. It needs to straight-load =org-mode= because most packages expect the latest version, and not the version that ships with Emacs.
-**** Elpaca
+**** [[https://github.com/progfolio/elpaca][GitHub - progfolio/elpaca: An elisp package manager]]
 #+begin_src emacs-lisp
 ;; Block until current queue processed.
 (elpaca-wait)
+(defun my/elpaca-go ()
+  "Run `elpaca-wait'."
+  (interactive)
+  (elpaca-wait))
 #+end_src
-
 ** Start-up
 *** Load directory
 Snippet for loading of all elisp files in a directory.
