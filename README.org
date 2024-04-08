@@ -241,20 +241,6 @@ Magit is a complete text-based user interface to [[https://git-scm.com/][Git]].
 	      ("p" . 'magit-previous-line)
 	      ("C-n" . 'magit-section-forward)
 	      ("C-p" . 'magit-section-backward)))
-(defun project-magit ()
-  "Start Vterm in the current project's root directory.
-If a buffer already exists for running Vterm in the project's root,
-switch to it.  Otherwise, create a new Vterm buffer.
-With \\[universal-argument] prefix arg, create a new Vterm buffer even
-if one already exists."
-  (interactive)
-  (defvar magit-buffer-name)
-  (let* ((default-directory (project-root (project-current t)))
-         (magit-buffer-name (project-prefixed-buffer-name "magit"))
-         (magit-buffer (get-buffer magit-buffer-name)))
-    (if (and magit-buffer (not current-prefix-arg))
-        (pop-to-buffer magit-buffer (bound-and-true-p display-comint-buffer-action))
-      (call-interactively 'magit))))
 (add-to-list 'project-switch-commands '(project-magit "Magit"))
 #+end_src
 *** Large files
@@ -466,63 +452,6 @@ non-nil argument.
 (add-hook 'ediff-keymap-setup-hook 'add-d-to-ediff-mode-map)
 (setq ediff-long-help-message-merge "\np,DEL -previous diff |     | -vert/horiz split   |  x -copy buf X's region to C\nn,SPC -next diff     |     h -highlighting       |  d -copy both regions to C\nj -jump to diff      |     @ -auto-refinement    |  r -restore buf C's old diff\ngx -goto X's point   |    ## -ignore whitespace  |  * -refine current region\nC-l -recenter        | #f/#h -focus/hide regions |  ! -update diff regions\nv/V -scroll up/dn    |     X -read-only in buf X |  + -combine diff regions\n</> -scroll lt/rt    |     m -wide display       | wx -save buf X\n~ -swap variants     |     s -shrink window C    | wd -save diff output\n                     |  $$ -show clashes only    |  / -show/hide ancestor buff\n                     |  $* -skip changed regions |  & -merge w/new default\n")
 #+end_src
-**** [[https://github.com/akermu/emacs-libvterm][vterm]]
-#+begin_src emacs-lisp :tangle no
-(use-package vterm
-  :ensure t
-  :after
-  (centered-cursor-mode)
-  (corfu-mode)
-  :init
-  ;; https://github.com/janEbert/dotfiles/blob/master/init.el
-  (defun vterm--watch-for-password-prompt (process input &rest _args)
-    "Prompt for password and send to PROCESS without echoing.
-    Checks if INPUT contains a password prompt as defined by
-    `comint-password-prompt-regexp'."
-    (when (let ((case-fold-search t))
-            (string-match comint-password-prompt-regexp input))
-      (let* ((prompt (match-string 0 input))
-             (password (read-passwd prompt)))
-        (vterm-send-string password)
-        (clear-string password)
-        (vterm-send-return))))
-
-  (advice-add 'vterm--filter :after
-              #'vterm--watch-for-password-prompt)
-  :bind (:map vterm-mode-map
-              ("C-y" . vterm-yank)
-              ("C-x C-x" . vterm-send-C-x)))
-
-(defun project-vterm ()
-  "Start Vterm in the current project's root directory.
-If a buffer already exists for running Vterm in the project's root,
-switch to it.  Otherwise, create a new Vterm buffer.
-With \\[universal-argument] prefix arg, create a new Vterm buffer even
-if one already exists."
-  (interactive)
-  (defvar vterm-buffer-name)
-  (let* ((default-directory (project-root (project-current t)))
-         (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
-         (vterm-buffer (get-buffer vterm-buffer-name)))
-    (if (and vterm-buffer (not current-prefix-arg))
-        (pop-to-buffer vterm-buffer (bound-and-true-p display-comint-buffer-action))
-      (vterm t))))
-
-(add-to-list 'project-switch-commands '(project-vterm "Vterm"))
-(defvar vterm-tramp-shells `(("docker" ,(format "/usr/bin/env %s" my-shell))))
-;; required to make tramp directory tracking work correctly
-;; https://github.com/akermu/emacs-libvterm/issues/36
-(defvar tramp-default-method "ssh")
-(defvar vterm-shell (format "/run/current-system/sw/bin/%s" my-shell))
-(defvar tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>].* *\\(^[\\[[0-9;]*[a-zA-Z] *\\)*")
-(setq shell-file-name my-shell
-      vterm-buffer-name-string "%s")
-(add-hook 'vterm-mode-hook 'my/disable-ccm)
-(defun my/disable-hlm ()
-  (hl-line-mode -1))
-(add-hook 'vterm-mode-hook 'my/disable-hlm)
-(add-hook 'vterm-mode-hook 'my/disable-cm)
-#+end_src
 **** [[https://codeberg.org/akib/emacs-eat][akib/emacs-eat: Emulate A Terminal, in a region, in a buffer and in Eshell - Codeberg.org]]
 #+begin_src emacs-lisp
 (use-package eat
@@ -533,22 +462,14 @@ if one already exists."
   :after
   (centered-cursor-mode)
   :init
-  (defun rename-buffer-to-pwd ()
-    (rename-buffer ))
-  (defun my/eat ()
-    (interactive)
-    (let* ((pwd-buffer-name (string-replace "Directory " "" (pwd)))
-           (switch-to (get-buffer pwd-buffer-name)))
-      (if switch-to
-          (switch-to-buffer switch-to)
-        (let ((rename-to (lambda ()
-                           (rename-buffer pwd-buffer-name))))
-          (add-hook 'eat-mode-hook 'rename-to)
-          (eat nil 1)
-          (remove-hook 'eat-mode-hook 'rename-to)))))
-  (defvar eat-kill-buffer-on-exit t)
-  (add-hook 'eat-mode-hook 'my/disable-ccm)
-  (add-hook 'eat-mode-hook 'rename-buffer-to-pwd))
+  ;; github.com/purcell/emacs.d/blob/0088f4f7d1ee7b2667ff801b1436f5feac1cc321/lisp/init-terminals.el
+  (defun sanityinc/on-eat-exit (process)
+    (when (zerop (process-exit-status process))
+      (kill-buffer)
+      (unless (eq (selected-window) (next-window))
+        (delete-window))))
+  (add-hook 'eat-exit-hook 'sanityinc/on-eat-exit)
+  (add-hook 'eat-mode-hook 'my/disable-ccm))
 #+end_src
 **** org
 #+begin_src emacs-lisp
@@ -720,11 +641,11 @@ if one already exists."
 (use-package puni
   :ensure t
   :init
-  (add-hook 'vterm-mode-hook #'puni-disable-puni-mode))
+  (add-hook 'eat-mode-hook #'puni-disable-puni-mode))
 #+end_src
 *** Parentheses
 #+begin_src emacs-lisp
-(electric-pair-mode 1)
+(electric-pair-mode)
 #+end_src
 ** Completion
 **** [[https://github.com/minad/marginalia][Marginalia]]
@@ -1428,7 +1349,7 @@ web-mode.el is an autonomous emacs major-mode for editing web templates.
 *** fringe
 #+begin_src emacs-lisp
 (load-file (expand-file-name "artifacts/fringe-hide.el" my-emacs-path))
-(add-hook 'vterm-mode-hook #'(lambda () (fringe-hide "both-margin")))
+(add-hook 'eat-mode-hook #'(lambda () (fringe-hide "both-margin")))
 #+end_src
 *** highlighting
 #+begin_src emacs-lisp
@@ -1799,8 +1720,7 @@ Multiple cursors for emacs.
   (require 'god-mode)
   (defun my-god-mode-update-cursor-type ()
     (setq cursor-type (if (or god-local-mode buffer-read-only) 'hbar 'bar)))
-  (add-hook 'post-command-hook #'my-god-mode-update-cursor-type)
-  (add-to-list 'god-exempt-major-modes 'vterm-mode))
+  (add-hook 'post-command-hook #'my-god-mode-update-cursor-type))
 #+end_src
 *** My custom keybindings
 #+begin_src emacs-lisp
