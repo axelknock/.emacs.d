@@ -311,6 +311,7 @@ Magit is a complete text-based user interface to [[https://git-scm.com/][Git]].
 **** [[https://github.com/alphapapa/activities.el][GitHub - alphapapa/activities.el: Activities for Emacs (suspend and resume activities, i.e. frames/tabs and their windows, buffers)]]
 #+begin_src emacs-lisp 
 (use-package activities
+  :after (consult)
   :ensure t
   :init
   (defvar activities-kill-buffers t)
