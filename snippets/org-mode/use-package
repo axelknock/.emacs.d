@@ -1,7 +1,10 @@
 # -*- mode: snippet -*-
 # name: emacs lisp
-# key: elisp
+# key: use
 # --
 #+begin_src emacs-lisp
-$0
+(use-package $1
+  :ensure t
+  :init
+  $0)
 #+end_src
