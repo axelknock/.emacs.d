@@ -556,13 +556,20 @@ if one already exists."
 #+end_src
 *** bookmarks
 #+begin_src emacs-lisp
-(defun my/bookmark-set-url (url)
-  (interactive "sBookmark URL: ")
-  (let ((bkmks bookmark-alist))
-    (if (assoc url bkmks)
-        (user-error "%s is already bookmarked" url)
-      (push `(,url . ((handler . ,(lambda (bookmark)
-                                    (browse-url (car bookmark))))))
+(defun my/url-bookmark-handler (bookmark)
+  "Browse location (url) of BOOKMARK."
+  (browse-url (alist-get 'location bookmark)))
+
+(defun my/bookmark-set-url (name url)
+  "Set a bookmark named NAME and URL as location."
+  (interactive "sBookmark Name: \nsBookmark URL: ")
+  (let ((existing-bookmark (cl-find-if (lambda (bookmark)
+                                         (string= url (alist-get 'location (cdr bookmark))))
+                                       bookmark-alist)))
+    (if existing-bookmark
+        (user-error "URL %s is already bookmarked as %s" url (car existing-bookmark))
+      (push `(,name . ((location . ,url)
+                       (handler . my/url-bookmark-handler)))
             bookmark-alist))))
 #+end_src
 ** Menus
