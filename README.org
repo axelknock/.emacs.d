@@ -1523,6 +1523,11 @@ This minor mode highlights indentation levels via font-lock. Indent widths are d
 (use-package yasnippet-capf
   :ensure t)
 #+end_src
+***** [[https://github.com/abo-abo/auto-yasnippet][GitHub - abo-abo/auto-yasnippet: quickly create disposable yasnippets]]
+#+begin_src emacs-lisp
+(use-package auto-yasnippet
+  :ensure t)
+#+end_src
 **** abbrev
 #+begin_src emacs-lisp :tangle no
 (abbrev-mode 1)
