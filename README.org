@@ -1246,6 +1246,10 @@ web-mode.el is an autonomous emacs major-mode for editing web templates.
   (add-hook 'web-mode-hook 'sgml-electric-tag-pair-mode)
   (add-hook 'web-mode-hook 'my/set-liquid-comments))
 #+end_src
+*** Javascript/Typescript
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.tsx" . tsx-ts-mode))
+#+end_src
 *** yaml
 #+begin_src emacs-lisp
 (use-package yaml-mode :ensure t)
