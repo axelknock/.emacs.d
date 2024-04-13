@@ -424,7 +424,7 @@ When called with a prefix, prompt for new buffer's name."
           ednc-view-mode
           django-commands-server-mode
           "\\*eldoc\\*")
-        ;; popper-group-function #'popper-group-by-activities
+        popper-group-function #'popper-group-by-activities
         popper-display-control nil)
   (popper-mode 1)
   (popper-echo-mode 1)
