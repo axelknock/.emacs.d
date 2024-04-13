@@ -473,6 +473,12 @@ non-nil argument.
       (kill-buffer)
       (unless (eq (selected-window) (next-window))
         (delete-window))))
+  (defun my/eat-dwim ()
+    "Always open new session, and at root if inside project."
+    (interactive)
+    (if (project-current)
+        (eat-project t)
+        (eat nil t)))
   (add-hook 'eat-exit-hook 'sanityinc/on-eat-exit)
   (add-hook 'eat-mode-hook 'my/disable-ccm))
 #+end_src
