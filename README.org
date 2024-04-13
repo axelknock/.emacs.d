@@ -241,8 +241,11 @@ Magit is a complete text-based user interface to [[https://git-scm.com/][Git]].
 	      ("n" . 'magit-next-line)
 	      ("p" . 'magit-previous-line)
 	      ("C-n" . 'magit-section-forward)
-	      ("C-p" . 'magit-section-backward)))
-(add-to-list 'project-switch-commands '(project-magit "Magit"))
+	      ("C-p" . 'magit-section-backward))
+  :init
+  ;; https://github.com/magit/magit/discussions/4973#discussioncomment-8858908
+  ;; (setq git-commit-cd-to-toplevel t)
+  (add-to-list 'project-switch-commands '(project-magit "Magit")))
 #+end_src
 *** Large files
 **** [[https://github.com/m00natic/vlfi][vlfi]]
