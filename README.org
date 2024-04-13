@@ -398,7 +398,7 @@ When called with a prefix, prompt for new buffer's name."
 **** [[https://github.com/karthink/popper][popper]]
 #+begin_src emacs-lisp
 (use-package popper
-  :after (shackle)
+  :after (shackle activities)
   :ensure t
   :init
   (defun popper-group-by-activities ()
