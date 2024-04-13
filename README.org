@@ -928,6 +928,9 @@ Otherwise run `affe-grep' with no argument."
   (gptel-make-anthropic "Claude"          ;Any name you want
     :stream t         ;Streaming responses
     :key (auth-source-pick-first-password :host "api.anthropic.com"))
+  (gptel-make-gemini "Gemini"          ;Any name you want
+    :stream t         ;Streaming responses
+    :key (auth-source-pick-first-password :host "generativelanguage.googleapis.com"))
   (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
   (setq gptel-directives
         '((default . "")
