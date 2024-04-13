@@ -1114,6 +1114,16 @@ Otherwise run `affe-grep' with no argument."
 (use-package dape
   :ensure t)
 #+end_src
+**** [[https://github.com/jdtsmith/eglot-booster][GitHub - jdtsmith/eglot-booster: Boost eglot using lsp-booster]]
+#+begin_src emacs-lisp
+(use-package eglot-booster
+  :ensure (eglot-booster
+           :host github
+           :repo "jdtsmith/eglot-booster")
+  :after eglot
+  :init
+  (eglot-booster-mode))
+  #+end_src
 *** markdown
 #+begin_src emacs-lisp
 (use-package markdown-mode :ensure t)
