@@ -929,7 +929,10 @@ Otherwise run `affe-grep' with no argument."
     :stream t         ;Streaming responses
     :key (auth-source-pick-first-password :host "api.anthropic.com"))
   (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
-  (add-to-list 'gptel-directives '(elisp-hacker . "You are an expert emacs lisp programmer and have written several widely used packages, admired for their utility despite their simplicity. Comments should be prepended with ;;")))
+  (setq gptel-directives
+        '((default . "")
+          (elisp-hacker . "You are an expert emacs lisp programmer and have written several widely used packages, admired for their utility despite their simplicity. Comments should be prepended with ;;")
+          (python-programmer . "You are an expert python programmer, and do things the pythonic way. Anything you respond with that is not code should be commented. Respond concisely."))))
 #+end_src
 ** Knowledge Management
 *** Note taking
